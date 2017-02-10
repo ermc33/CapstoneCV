@@ -7,7 +7,7 @@ camera = cv2.VideoCapture(0)
 #Define video object. Second parameter is the video codec
 #Third parameter is the FPS of the video and last one is the FrameSize
 #For LifeCam 20fps
-#For Logitech 
+#For Logitech 30fps
 video = cv2.VideoWriter('video10.avi', -1,10, (640,480));
 
 while True:
