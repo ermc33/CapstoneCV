@@ -1,6 +1,6 @@
 
 import numpy as np
-import cv2
+import cv2 #hola
 
 #Video capture object. (0)-> number of camera device
 camera = cv2.VideoCapture(0)
