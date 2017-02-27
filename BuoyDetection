@@ -1,0 +1,89 @@
+
+
+import cv2
+import numpy as np
+
+contours = np.array([])
+hierarchy = np.array([])
+moments = np.array([])
+scale = 1
+delta = 0
+ddepth = cv2.CV_16S
+cap = cv2.VideoCapture("videoLifeCamSteady1.mov")
+kernel = np.ones((5,5), np.uint8)
+kernel_size = 3
+listcx = []
+listcy =[]
+centres = []
+def Canny_Median(image,sigma =0.33):
+    
+    bb1 = np.median(frame)
+    
+    lowerB = int(max(0, (1.0 - sigma) * bb1))
+    upperB = int(min(255,(1.0 + sigma) * bb1))
+    edgesMed = cv2.Canny(image,lowerB,upperB)
+    
+    return edgesMed
+
+
+while (True):
+    ret, frame  = cap.read()
+    output = frame.copy()
+    #Pasar un filtro que ayude a detectar mejor esquinas. 
+    FilteredImage = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    #FilteredImage = cv2.equalizeHist(FilteredImage)
+    #Gray = FilteredImage.copy()
+    FilteredImage = cv2.bilateralFilter(frame,5,300,300)
+    
+ 
+    
+    edges_stat = cv2.Canny(FilteredImage, 100,100, True)
+    #edges_stat = Canny_Median(FilteredImage)
+    #edgescop = edges_stat.copy()
+    edgesFiltered = cv2.bilateralFilter(edges_stat,3,300,300)
+    
+    #edges_stat = cv2.dilate(FilteredImage,kernel,iterations = 1)
+    
+    contours, hierarchy = cv2.findContours(edgesFiltered, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE, contours, hierarchy)
+    contour_List = []
+    for contour in contours :
+#Need to calculate perimeter for distance calculation 
+         approxC = cv2.approxPolyDP(contour, 0.02*cv2.arcLength(contour,True),True)
+         areaC= cv2.contourArea(contour)
+         if ((len(approxC)>= 8) & (areaC > 600)):
+             contour_List.append(contour)
+             lenghtCo = len(contour_List)
+             #print lenghtCo
+          
+ ######### #########  #########  looping over contours  #########  #########  #########             
+             for i in xrange(len(contour_List)):
+                 
+                 moments = cv2.moments(contour_List[i])
+                 cv2.drawContours(output, contour_List,  -1, (255,0,0), 2)
+                 centres.append((int(moments['m10']/moments['m00']),int(moments['m01']/moments['m00'])))
+
+                 print centres
+                 cv2.circle(output, centres[-1], 7, (255, 255, 255), -1)
+
+ ######### ######### ######### ######### ######### ######### ######### ######### #########
+             #Bounding Box Option
+             #rect =cv2.boundingRect(contour_List[0])
+             #x,y,w,h = rect
+             #cv2.rectangle(output,(x,y),(x+w,y+h),(0,255,0),2)
+    
+    
+    bb2 = cv2.resize(output, (500,300))
+    bb1 = cv2.resize(edges_stat, (500,300))
+    bb4 = cv2.resize(edgesFiltered, (500,300))
+    bb3 = cv2.resize(frame,(500,300))
+    cv2.imshow('Edge Map',bb1)
+    cv2.imshow('Detection Screen',bb2)
+    cv2.imshow("Original Image",bb3)
+    cv2.imshow("Filtered Edge Map",bb4)
+    
+    if cv2.waitKey(1) & 0xFF == ord('q'):
+        break
+
+# When everything done, release the capture
+cap.release()
+cv2.destroyAllWindows()
