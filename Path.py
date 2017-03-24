@@ -35,8 +35,8 @@ a1 = np.array([])
 a2 = np.array([])
 b1 =np.array ([0,200])
 b2 = np.array([630,200])
-pathIm = cv2.imread("path4.jpg")
-
+pathIm = cv2.imread("path1.jpg")
+contour_List1 = [] 
 pathIm= cv2.resize(pathIm,(630,400))
 pathIm2 = pathIm.copy()
 pathIm2 = cv2.cvtColor(pathIm2, cv2.COLOR_BGR2GRAY)
@@ -47,8 +47,14 @@ k = 0
 ID =0
 count =0
 contours, hierarchy = cv2.findContours(path_edges, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE, contours, hierarchy)
-if not len(contours) == 0:
-    for cnt in contours:
+
+for contour in contours:
+    approxV = cv2.approxPolyDP(contour, 0.02*cv2.arcLength(contour,True),True)
+    if (( 4 <= len(approxV) <= 8)) :
+        contour_List1.append(contour)
+         
+if not len(contour_List1) == 0:
+    for cnt in contour_List1:
         count +=1
         kcomp = len(cnt)
         if kcomp > k:
@@ -61,7 +67,7 @@ if not len(contours) == 0:
         
     
 #k = len(contours) -1
-rect = cv2.minAreaRect(contours[ID])
+rect = cv2.minAreaRect(contour_List1[ID])
 box = cv2.cv.BoxPoints(rect)
 box = np.int0(box)
 cv2.drawContours(pathIm,[box],0,(0,0,255),2)
