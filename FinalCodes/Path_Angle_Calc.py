@@ -8,10 +8,8 @@ Created on Wed Mar 29 10:24:37 2017
 """
 import cv2
 import numpy as np
-import messPassing
-#Libreria para visualizar
-#import matplotlib.pyplot as plt
-#import AngleTest 
+import messPassing #Object to store data and make further operations in the vehicle logic
+
 
 #Start Searching path and angle
 def startPathPCA():
@@ -28,24 +26,24 @@ def startPathPCA():
     pathIm2 = pathIm.copy()
     Filt_path = cv2.bilateralFilter(pathIm,7,900,900)
      
-    'Color Thresholds'
+    #Color Thresholds
     lower_thresh = np.array([0,30,30], dtype='uint8') #Parameter to adjust in the pool
     upper_thresh = np.array([50,170,255], dtype='uint8')#Parameter to adjust in the pool
-    'Image Segmentation'
-    segmented_image = cv2.inRange(pathIm , lower_thresh, upper_thresh) 
-    'Calculate Edge Map'
-    path_edges = cv2.Canny(segmented_image, 0,100, True)
-    'Find Contours'
+    #Image Segmentation
+    segmented_image = cv2.inRange(pathIm , lower_thresh, upper_thresh) #Segmentation operation
+    #Calculate Edge Map
+    path_edges = cv2.Canny(segmented_image, 0,100, True) #Find the edges in the image
+    #Find Contours
     contours, hierarchy = cv2.findContours(path_edges, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE, contours, hierarchy)
-    'Check if contours were found'
+    #Check if contours were found
     if len(contours) ==0:
         print "Adjust canny"
-    'Look for a rectangle'
+    #Look for a rectangle. Looking for an object with 3 to 6 vertices thus approximating a rectangle
     for contour in contours:
         approxV = cv2.approxPolyDP(contour, 0.02*cv2.arcLength(contour,True),True)
-        if (( 4 <= len(approxV) <= 10)) :
+        if (len(approxV) >= 3 and len(approxV) <= 6 ):
             contour_List1.append(contour)
-    'Check if rectangle were found'        
+    #Check if rectangle were found        
     if len(contour_List1) == 0:
         print "No rectangle found" 
        
@@ -59,21 +57,21 @@ def startPathPCA():
             else: 
                 k = k
     
-    y_coor, x_coor = np.nonzero(path_edges)
+    y_coor, x_coor = np.nonzero(path_edges)#Obtaining the non zero indices of all the values in each dimension  
+    #Minimizing mean square error
     x_coor = x_coor - np.mean(x_coor) #Substracting x - xmean for stability 
-    y_coor = y_coor - np.mean(y_coor)#Substracting y - ymean for stability 
+    y_coor = y_coor - np.mean(y_coor)#Substracting y - ymean for stability
     
-    coords = np.vstack([x_coor, y_coor]) 
+    coords = np.vstack([x_coor, y_coor])#Transpose 
     cov = np.cov(coords) #Covariance Matrix
     evals, evecs = np.linalg.eig(cov) #EigenValues and EigenVectors
     sort_indices = np.argsort(evals)[::-1] #Sort EigenValues in decreasing order
     evec1, evec2 = evecs[:, sort_indices]
     x_v1, y_v1 = evec1  # Eigenvector with largest eigenvalue
     x_v2, y_v2 = evec2
-    theta = np.tanh((x_v1)/(y_v1))
-    theta = theta*100 #Angle for control system 
-    message.angle(theta)
-    #AngleTest.receive(theta)  #Angle for control system 
+    theta = np.tanh((x_v1)/(y_v1))#Angle calculation
+    theta = theta*100 #Angle for control system  
+    message.angle(theta) #returning the angle to the object 
+    
     #return value after calculating the angle
     return message
-
