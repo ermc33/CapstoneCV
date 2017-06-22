@@ -1,2 +1,2 @@
 # CapstoneCV
-Computer Vision codes for RUMarino 
+This Git contains the Computer Vision algorithms developed  for Team RUMarino and the DeepVision Capstone project. 
