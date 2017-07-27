@@ -7,7 +7,7 @@ Created on Wed Jul 26 21:10:18 2017
 """
 
 import cv2
-vidcap = cv2.VideoCapture('videoLifeCamSteady1.mov')
+vidcap = cv2.VideoCapture('videoLifeCamSteady1.mov')#Put video here
 success,image = vidcap.read()
 count = 0
 GrabFrame_true = True
@@ -16,5 +16,5 @@ while success:
   print('Grabate ESTE: ', GrabFrame_true)
   cv2.imwrite("frame%d.jpg" % count, image)     # save frame as JPEG file
   count +=1
-  if count == 20 :#Control variable. Change it depending on how many images you want 
+  if count == 20 :#Control variable. Change it depending on how 
       success = False 
